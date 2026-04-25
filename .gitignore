@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/
+*.pkl
+# Excluding large binary files or data if necessary, but pkl files are usually fine if small.
+# However, usually it's better to exclude them and provide a way to download/generate them.
+# For now, let's keep it simple.

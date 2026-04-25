@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse AI | Clinical Decision Support System (CDSS)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card glass">
+            <i class="fa-solid fa-user-doctor-hair"></i>
+            <h2>Clinical Access Portal</h2>
+            <p>Authorized Physician Login Required</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Physician ID</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label>Secure Key</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Verify Credentials</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="glass-bg"></div>
+    
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-heart-pulse pulse"></i>
+            <span>Pulse AI | CDSS</span>
+        </div>
+        <div class="nav-links">
+            <a href="#analyze">Analyze</a>
+            <a href="#history">History</a>
+            <a href="#how-it-works">Technology</a>
+            <button id="logoutBtn" class="btn-logout hidden"><i class="fa-solid fa-right-from-bracket"></i></button>
+            <button class="btn-primary" onclick="window.location.href='#analyze'">Professional Portal</button>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <div class="badge-ai"><i class="fa-solid fa-shield-halved"></i> Trained with Privacy-Preserving Synthetic Data (GANs)</div>
+                <h1 class="gradient-text">Pulse AI: Clinical Decision Support System (CDSS)</h1>
+                <p>Advanced ensemble learning for high-precision heart disease classification. Optimized for clinical sensitivity and medical explainability.</p>
+                <a href="#analyze" class="btn-cta">Initiate Clinical Intake <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="hero-image">
+                <div class="main-pulse-card">
+                    <i class="fa-solid fa-heart-pulse big-pulse"></i>
+                    <div class="stat">
+                        <span class="label">Model Accuracy (Validated)</span>
+                        <span class="value">83.61%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="analyze" class="container">
+            <div class="form-card glass">
+                <div class="card-header">
+                    <h2>Patient Diagnostics</h2>
+                    <p>Enter clinical parameters for Pulse AI analysis</p>
+                </div>
+
+                <div class="simulation-panel">
+                    <span class="panel-label"><i class="fa-solid fa-robot"></i> AI Patient Simulation:</span>
+                    <div class="sim-buttons">
+                        <button type="button" class="btn-sim sim-low" onclick="generateSim('low')">No / Low Risk</button>
+                        <button type="button" class="btn-sim sim-med" onclick="generateSim('moderate')">Moderate Risk</button>
+                        <button type="button" class="btn-sim sim-high" onclick="generateSim('high')">High Risk Case</button>
+                    </div>
+                </div>
+                
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Age <span class="label-hint">(How old are you?)</span></label>
+                            <input type="number" name="age" placeholder="e.g. 52" required min="1" max="120">
+                        </div>
+                        <div class="input-group">
+                            <label>Sex <span class="label-hint">(Male or Female?)</span></label>
+                            <select name="sex" required>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Chest Pain Type <span class="label-hint">(What kind of chest pain?)</span></label>
+                            <select name="cp" required>
+                                <option value="0">Typical Angina (Squeezing chest pain)</option>
+                                <option value="1">Atypical Angina (Unusual chest discomfort)</option>
+                                <option value="2">Non-anginal Pain (Not heart-related pain)</option>
+                                <option value="3">Asymptomatic (No chest pain at all)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Resting Blood Pressure <span class="label-hint">(BP when sitting at rest, mmHg)</span></label>
+                            <input type="number" name="trestbps" placeholder="e.g. 120" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Cholesterol Level <span class="label-hint">(Fat in blood, mg/dl)</span></label>
+                            <input type="number" name="chol" placeholder="e.g. 210" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Fasting Blood Sugar <span class="label-hint">(Sugar level after 8hrs no food)</span></label>
+                            <select name="fbs">
+                                <option value="0">Normal (&lt; 120 mg/dl)</option>
+                                <option value="1">High (&gt; 120 mg/dl — possible diabetes)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Resting ECG <span class="label-hint">(Heart electrical activity at rest)</span></label>
+                            <select name="restecg">
+                                <option value="0">Normal (Heart looks healthy)</option>
+                                <option value="1">ST-T Abnormality (Mild irregularity detected)</option>
+                                <option value="2">LV Hypertrophy (Heart wall thickening)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Max Heart Rate Achieved <span class="label-hint">(Highest heart rate during exercise)</span></label>
+                            <input type="number" name="thalach" placeholder="e.g. 150" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Exercise-Induced Angina <span class="label-hint">(Chest pain triggered by exercise?)</span></label>
+                            <select name="exang">
+                                <option value="0">No (No chest pain during exercise)</option>
+                                <option value="1">Yes (Chest pain occurs during exercise)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>ST Depression (Oldpeak) <span class="label-hint">(Heart stress level during exercise)</span></label>
+                            <input type="number" step="0.1" name="oldpeak" placeholder="e.g. 1.2" required>
+                        </div>
+                        <div class="input-group">
+                            <label>ST Slope <span class="label-hint">(Shape of heart stress curve)</span></label>
+                            <select name="slope">
+                                <option value="0">Upsloping (Good — improving under stress)</option>
+                                <option value="1">Flat (Neutral — no change under stress)</option>
+                                <option value="2">Downsloping (Concern — worsening under stress)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Major Vessels <span class="label-hint">(No. of blocked heart arteries, 0–3)</span></label>
+                            <input type="number" name="ca" min="0" max="3" value="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Thalassemia <span class="label-hint">(Type of blood/oxygen disorder)</span></label>
+                            <select name="thal" required>
+                                <option value="1">Normal (No blood disorder)</option>
+                                <option value="2">Fixed Defect (Permanent low blood flow area)</option>
+                                <option value="3">Reversible Defect (Temporary low blood flow)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-predict">Analyze with Pulse AI</button>
+                </form>
+            </div>
+
+            <div id="resultContainer" class="result-card glass hidden">
+                <div class="result-header">
+                    <h3>Diagnostic Result</h3>
+                    <div id="riskLevel" class="risk-badge">Low Risk</div>
+                </div>
+                
+                <div class="result-body">
+                    <div class="score-section">
+                        <div class="circular-progress">
+                            <span id="riskScore">0%</span>
+                        </div>
+                        <p class="score-label">Risk Probability</p>
+                        
+                        <div class="risk-legend">
+                            <div class="legend-item"><span class="dot dot-low"></span> No / Low Risk <span class="range">0-35%</span></div>
+                            <div class="legend-item"><span class="dot dot-med"></span> Moderate <span class="range">35-65%</span></div>
+                            <div class="legend-item"><span class="dot dot-high"></span> High Risk <span class="range">65-100%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="explanation-section">
+                        <h4>Explainable AI (XAI) - Feature Impact</h4>
+                        <canvas id="xaiChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="cdss-grid">
+                    <div class="cdss-card diet-section">
+                        <h4><i class="fa-solid fa-leaf"></i> Vegan Dietary Prescription</h4>
+                        <div class="diet-lists">
+                            <div class="diet-list positive">
+                                <h5>Foods to Prioritize</h5>
+                                <ul id="dietEatList"></ul>
+                            </div>
+                            <div class="diet-list negative">
+                                <h5>Foods to Avoid</h5>
+                                <ul id="dietAvoidList"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cdss-card exercise-section">
+                        <h4><i class="fa-solid fa-person-running"></i> Cardiovascular Exercise Plan</h4>
+                        <ul id="exerciseList"></ul>
+                        <div class="clinical-action-box">
+                            <h5><i class="fa-solid fa-stethoscope"></i> Clinical Action</h5>
+                            <p id="clinicalActionText"></p>
+                        </div>
+                        <div class="supplements-box">
+                            <h5><i class="fa-solid fa-pills"></i> Vegan Supplements</h5>
+                            <p id="supplementsText"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-footer">
+                    <button id="downloadReport" class="btn-secondary">
+                        <i class="fa-solid fa-file-pdf"></i> Download Professional Clinical Report
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="history" class="container container-history hidden">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Patient Diagnostic History</h2>
+                <p>Secure clinical ledger of previous heart classifications</p>
+                <button id="clearHistory" class="btn-text-only">Clear All Records</button>
+            </div>
+            <div class="history-table-container glass">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient Profile</th>
+                            <th>Risk Probability</th>
+                            <th>Clinical Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- History rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section id="validation" class="container">
+            <h2 class="section-title"><i class="fa-solid fa-microscope"></i> Clinical Validation & Peer Review</h2>
+            <div class="validation-dashboard glass">
+                <div class="metrics-column">
+                    <h3>Performance Matrix (Real Test Data)</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="m-label">Sensitivity (Recall)</span>
+                            <span class="m-value">91.4%</span>
+                            <span class="m-note">High Sensitivity / Low False Negatives</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="m-label">Specificity</span>
+                            <span class="m-value">84.37%</span>
+                            <span class="m-note">Healthy Identification</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="m-label">Precision</span>
+                            <span class="m-value">82.76%</span>
+                            <span class="m-note">Correctness of Alarms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="m-label">F1-Score</span>
+                            <span class="m-value">0.88</span>
+                            <span class="m-note">Harmonic Clinical Mean</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-column">
+                    <h3>Scientific Evaluation Charts</h3>
+                    <div class="research-charts">
+                        <img src="{{ url_for('static', filename='img/pulse_ai_metrics_v2.png') }}" alt="Confusion Matrix (TP/FP/FN/TN) and ROC Curve" class="research-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ethics" class="container">
+            <div class="ethics-card glass">
+                <h3><i class="fa-solid fa-scale-balanced"></i> Clinical Ethics & System Limitations</h3>
+                <div class="ethics-content">
+                    <div class="ethics-item">
+                        <h5>Purpose & Intent</h5>
+                        <p>Pulse AI is designed as a <b>Clinical Decision Support System (CDSS)</b> to assist medical professionals. It is not a replacement for independent clinical judgment or specialized diagnostic imaging.</p>
+                    </div>
+                    <div class="ethics-item">
+                        <h5>Data Integrity</h5>
+                        <p>Trained on the UCI Heart Disease cohort augmented with GAN-synthetic data. Results may vary across demographics not fully represented in the training set.</p>
+                    </div>
+                    <div class="ethics-item">
+                        <h5>Regulatory Status</h5>
+                        <p>Prototype for academic demonstration. Requires clinical trials and regulatory approval (e.g., FDA/CE) before real-world hospital deployment.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="container">
+            <!-- Technology summary cards -->
+            <div class="tech-grid glass">
+                <div class="tech-card">
+                    <i class="fa-solid fa-microchip"></i>
+                    <h3>Core Engine</h3>
+                    <p>Powered by a specialized Random Forest ensemble refined on a mixed 2.3k record cohort for maximum predictive stability.</p>
+                </div>
+                <div class="tech-card">
+                    <i class="fa-solid fa-brain"></i>
+                    <h3>Explainable AI</h3>
+                    <p>SHAP (SHapley Additive exPlanations) values provide individual-level clinical transparency for every diagnostic result.</p>
+                </div>
+                <div class="tech-card">
+                    <i class="fa-solid fa-database"></i>
+                    <h3>GAN Resilience</h3>
+                    <p>Augmented with high-fidelity synthetic data via Generative Adversarial Networks to ensure model robustness and privacy.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 Pulse AI Clinical Decision Support System. For Professional Use Only.</p>
+        </footer>
+
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
