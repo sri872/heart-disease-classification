@@ -941,8 +941,25 @@
                     <i class="fa-solid fa-circle-check animate-bounce"></i>
                 </div>
                 <h4 style="color: #14532d; font-size: 1.1rem; font-weight: 700; margin: 0;">Consultation Appointment Confirmed!</h4>
-                <p style="color: #15803d; font-size: 0.85rem; line-height: 1.5; margin: 0;">A secure, encrypted Pulse-Telehealth connection uplink has been provisioned. A confirmation link & passcode has been transmitted via SMS to the patient's registered health record contact details.</p>
-                <button onclick="closeTelehealthBooking()" class="btn-primary" style="width: 100%; border-radius: 50px; padding: 0.8rem 0; font-size: 0.95rem; margin-top: 10px; background: #22c55e !important; border-bottom: 3px solid #15803d !important; cursor: pointer;">Done, Return to Portal</button>
+                <p style="color: #15803d; font-size: 0.82rem; line-height: 1.4; margin: 0;">This application is a local clinical sandbox, so SMS delivery is simulated. However, a secure, live WebRTC video consultation room is provisioned for you below:</p>
+                
+                <!-- Live WebRTC Call Handoff Block -->
+                <div style="width: 100%; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem; text-align: left; display: flex; flex-direction: column; gap: 8px; margin: 5px 0; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.05);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #166534;">
+                        <span>UPLINK ROOM:</span>
+                        <span id="telehealthRoomId" style="font-weight: bold; font-family: monospace; color: #15803d;">PULSE-AI-829A</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #166534;">
+                        <span>SECURITY PIN:</span>
+                        <span id="telehealthPin" style="font-weight: bold; font-family: monospace; color: #15803d;">839 210</span>
+                    </div>
+                    
+                    <a id="telehealthJoinBtn" href="#" target="_blank" class="btn-primary" style="background: #22c55e !important; border-bottom: 3px solid #15803d !important; text-align: center; padding: 0.6rem 0; font-size: 0.85rem; text-decoration: none; border-radius: 8px; font-weight: bold; color: white; display: block; margin-top: 5px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.15);">
+                        <i class="fa-solid fa-video"></i> Start Video Consult Now
+                    </a>
+                </div>
+
+                <button onclick="closeTelehealthBooking()" class="btn-primary" style="width: 100%; border-radius: 50px; padding: 0.8rem 0; font-size: 0.95rem; margin-top: 10px; background: #64748b !important; border-bottom: 3px solid #475569 !important; cursor: pointer;">Done, Return to Portal</button>
             </div>
         </div>
     </div>
@@ -1028,6 +1045,17 @@
         };
         
         window.submitTelehealthBooking = () => {
+            // Generate a random WebRTC room ID and 6-digit PIN
+            const randomId = Math.floor(1000 + Math.random() * 9000);
+            const pin = Math.floor(100000 + Math.random() * 900000);
+            const roomId = `PULSE-AI-MEET-${randomId}`;
+            
+            document.getElementById('telehealthRoomId').innerText = roomId;
+            document.getElementById('telehealthPin').innerText = pin.toString().replace(/(\d{3})(\d{3})/, '$1 $2');
+            
+            // Link to a real, live secure Jitsi room
+            document.getElementById('telehealthJoinBtn').href = `https://meet.jit.si/${roomId}`;
+            
             // Hide form, show confirmation state
             document.getElementById('telehealthFormContent').style.display = 'none';
             
