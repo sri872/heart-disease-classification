@@ -687,12 +687,33 @@ def mock_clinical_assistant(query, context):
             "- **Eliminate:** Deep-fried foods, saturated trans-fats, processed meat, and high-sodium counts (>1.5g/day).\n"
             "- **Supplements:** Daily Omega-3 EPA/DHA fatty acids and CoQ10 cellular support."
         )
+    elif "reverse" in q or "cure" in q or "heal" in q or "improve" in q:
+        return (
+            "### Plaque Reversal & Recovery Guidance\n"
+            "- **Plaque Stabilization:** While calcified arterial plaques cannot be fully 'cured,' active progression can be halted and soft fibrous plaques can be partially reversed.\n"
+            "- **Lipid Optimization:** Lowering LDL cholesterol under **70 mg/dL** (or ideally **55 mg/dL** for high-risk patients) via strict whole-food plant-based nutrition and statins is clinical priority #1.\n"
+            "- **Lifestyle Reversal**: Intensive clinical trials (such as Ornish & Esselstyn trials) demonstrate that strict physical activity, high-antioxidant diets, stress management, and tobacco cessation actively repair endothelial function over 12-24 months."
+        )
+    elif "pain" in q or "angina" in q or "symptom" in q or "breath" in q:
+        return (
+            "### Clinical Symptom Triage Protocol\n"
+            "- **Chest Pain (Angina):** Angina represents myocardial oxygen demand exceeding supply. Stable angina can be managed, but new or worsening symptoms must be triaged immediately.\n"
+            "- **Dyspnea (Shortness of Breath):** Can indicate diastolic dysfunction or early heart failure vectors. Monitored resting periods are required.\n"
+            "- **Emergency Triggers:** If chest pressure radiates to the left arm, neck, or jaw, or is accompanied by cold sweat, immediately utilize the top red bar to connect with the **Cardiac Emergency Desk (911)**."
+        )
+    elif "med" in q or "statin" in q or "drug" in q or "pill" in q or "blocker" in q:
+        return (
+            "### Cardiovascular Pharmacotherapy Overview\n"
+            "- **Lipid Management (Statins):** Atorvastatin or Rosuvastatin stabilizes coronary plaques, preventing rupture, and drastically reduces LDL production.\n"
+            "- **Pressure Regulation (ACE inhibitors/ARBs):** Lisinopril or Losartan relaxes arterial walls and reduces mechanical strain on the left ventricle.\n"
+            "- **Heart Rate Controls (Beta-blockers):** Metoprolol reduces myocardial oxygen consumption by keeping resting heart rate under optimal clinical ranges."
+        )
     else:
         return (
             "### Clinical Cardiology Assistant\n"
             f"Active patient context loaded (Age: {age}, Blood Pressure: {bp} mmHg, Cholesterol: {chol} mg/dL).\n"
             "- **Status:** The extracted diagnostic metrics are ready for clinical auditing.\n"
-            "- **Guidance:** Ask me questions about risk calculations, physical activity boundaries, or custom vegan diets."
+            "- **Guidance:** Ask me questions about risk calculations, Physical Activity boundaries, dietary adjustments, symptoms, or disease reversal pathways."
         )
 
 if __name__ == '__main__':
