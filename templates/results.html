@@ -593,10 +593,10 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <a href="tel:911" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #ef4444; color: #fff; font-weight: bold; border-bottom: 3px solid #b91c1c; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); text-decoration: none;">
+                <a href="tel:911" onclick="openDialerConsole(event, '911', 'Local Cardiac Emergency Services (911)')" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #ef4444; color: #fff; font-weight: bold; border-bottom: 3px solid #b91c1c; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); text-decoration: none;">
                     <i class="fa-solid fa-phone-volume"></i> Call Local Cardiac Emergency
                 </a>
-                <a href="tel:1800555999" class="btn-emergency-call" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border-bottom: 3px solid #0369a1; color: white; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
+                <a href="tel:1-800-555-999" onclick="openDialerConsole(event, '1-800-555-999', 'Cardiology ICU Emergency Desk')" class="btn-emergency-call" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border-bottom: 3px solid #0369a1; color: white; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
                     <i class="fa-solid fa-hospital"></i> Call Cardiology ICU Desk
                 </a>
             </div>
@@ -612,7 +612,7 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <a href="tel:1800555123" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #0284c7; color: #fff; font-weight: bold; border-bottom: 3px solid #0369a1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
+                <a href="tel:1-800-555-123" onclick="openDialerConsole(event, '1-800-555-123', 'Cardiology Advisory & Wellness Desk')" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #0284c7; color: #fff; font-weight: bold; border-bottom: 3px solid #0369a1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
                     <i class="fa-solid fa-phone"></i> Call Wellness Advisory Line
                 </a>
                 <a href="https://pulseai-cdss.org/telehealth" target="_blank" class="btn-emergency-call" style="background: #ffffff; border: 1px solid #0284c7; color: #0284c7; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05); text-decoration: none;">
@@ -752,7 +752,7 @@
                         </div>
                     </div>
 
-                    <a href="tel:911" id="emergencyCallBtn" class="btn-emergency-call" style="margin-top: 1.5rem; justify-content: center;">
+                    <a href="tel:911" onclick="openDialerConsole(event, '911', 'Community Cardiac Response Hub (911)')" id="emergencyCallBtn" class="btn-emergency-call" style="margin-top: 1.5rem; justify-content: center;">
                         <i class="fa-solid fa-phone-flip animate-shake"></i> Call Cardiac Desk Directly
                     </a>
                 </div>
@@ -854,6 +854,39 @@
         </button>
     </div>
 
+    <!-- Clinical Dialer Console Modal (Desktop Call Handoff Failover) -->
+    <div id="dialerConsoleModal" class="hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; transition: all 0.3s ease;">
+        <div class="glass" style="background: #ffffff !important; border: 2px solid #0284c7 !important; border-radius: 20px; max-width: 440px; width: 90%; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.25); text-align: center; position: relative;">
+            <button onclick="closeDialerConsole()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; transition: color 0.2s;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: #e0f2fe; color: #0284c7; margin-bottom: 1.5rem; font-size: 1.8rem;">
+                <i class="fa-solid fa-phone-volume"></i>
+            </div>
+            
+            <h3 id="dialerDeskName" style="color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 0 0 0.5rem 0;">Cardiology Call Desk</h3>
+            <p style="color: #64748b; font-size: 0.85rem; margin: 0 0 1.5rem 0; line-height: 1.4;">FaceTime/iCloud desktop handoff unavailable? You can dial manually or scan the QR code to dial instantly on your mobile device.</p>
+            
+            <!-- Massive Display of Number -->
+            <div style="background: #f0f9ff; border: 1px dashed #0284c7; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <span id="dialerDeskNumber" style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: #0284c7;">1-800-555-999</span>
+                <button onclick="copyDialerNumber()" style="background: #0284c7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; border-bottom: 2px solid #0369a1;">
+                    <span id="copyBtnText"><i class="fa-solid fa-copy"></i> Copy</span>
+                </button>
+            </div>
+            
+            <!-- Stylized Scan Box (QR Code Handoff) -->
+            <div style="border: 1px solid rgba(2, 132, 199, 0.15); border-radius: 16px; padding: 1.5rem; background: #f8fafc; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                <!-- High Contrast SVG QR Code Mockup representing the tel URI -->
+                <div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.05); width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <div style="width: 110px; height: 110px; background: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22white%22/><path d=%22M5 5h30v30H5zm60 0h30v30H65zm0 60h30v30H65zm-60 0h30v30H5zm10 10h10v10H15zm0-50h10v10H15zm50 0h10v10H65zm0 50h10v10H65zm-25-25h10v10H40zm10-10h10v10H50zm-20 0h10v10H30zm20 20h10v10H50zm-10 10h10v10H40zm10 10h10v10H50z%22 fill=%22%230284c7%22/></svg>') no-repeat center; background-size: contain;"></div>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: bold; color: #475569;"><i class="fa-solid fa-camera" style="color: #0284c7; margin-right: 5px;"></i> Scan with Phone Camera to Call</span>
+            </div>
+            
+            <button onclick="closeDialerConsole()" class="btn-primary" style="width: 100%; border-radius: 50px; padding: 0.8rem 0; font-size: 0.95rem;">Close Dialer Help</button>
+        </div>
+    </div>
+
     <!-- Script to execute the client state orchestration -->
     <script>
         window.switchTab = (tabId) => {
@@ -875,6 +908,38 @@
             if (activeBtn) {
                 activeBtn.classList.add('active');
             }
+        };
+
+        window.openDialerConsole = (event, number, deskName) => {
+            if (event) {
+                event.preventDefault(); // Intercept raw system dialer failure
+            }
+            document.getElementById('dialerDeskName').innerText = deskName;
+            document.getElementById('dialerDeskNumber').innerText = number;
+            
+            const modal = document.getElementById('dialerConsoleModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            
+            // Reset copy button
+            const copyBtnText = document.getElementById('copyBtnText');
+            copyBtnText.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
+        };
+        
+        window.closeDialerConsole = () => {
+            const modal = document.getElementById('dialerConsoleModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        };
+        
+        window.copyDialerNumber = () => {
+            const number = document.getElementById('dialerDeskNumber').innerText;
+            navigator.clipboard.writeText(number).then(() => {
+                const copyBtnText = document.getElementById('copyBtnText');
+                copyBtnText.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i> Copied!';
+            }).catch(err => {
+                alert("Failed to copy number.");
+            });
         };
 
         document.addEventListener('DOMContentLoaded', () => {
