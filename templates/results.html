@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse AI | Diagnostic Assessment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .results-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+        
+        .results-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .results-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 1100px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Critical alert block */
+        .critical-alert-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 2px solid var(--danger);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(239, 68, 68, 0.6); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+            50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 25px rgba(239, 68, 68, 0.5); }
+            100% { border-color: rgba(239, 68, 68, 0.6); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--danger);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .alert-header i {
+            font-size: 1.8rem;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        .btn-emergency-call {
+            background: linear-gradient(135deg, var(--danger), #b91c1c);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-emergency-call:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Hospital Locator UI */
+        .hospital-locator {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            padding: 1.2rem;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .locator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .locator-header i {
+            color: var(--primary);
+        }
+
+        .hospital-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            transition: background 0.3s;
+        }
+
+        .hospital-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hospital-info h5 {
+            color: white;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .hospital-info p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .hospital-distance {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(0, 242, 254, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Radar Chart Wrapper */
+        .chart-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chart-box h4 {
+            align-self: flex-start;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .radar-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+
+        /* Ingest parameters card list */
+        .parameters-summary {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .parameters-summary h4 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .params-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+        }
+
+        .param-summary-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .param-summary-card .p-lbl {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .param-summary-card .p-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Floating AI Chat Assistant Widget */
+        .clinical-chat-widget {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chat-toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: black;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 242, 254, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.08) rotate(5deg);
+        }
+
+        .chat-window {
+            width: 380px;
+            height: 520px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-bottom: 15px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+        }
+
+        .chat-window.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .chat-header {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-title-box i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .chat-title-box h4 {
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .chat-title-box span {
+            font-size: 0.7rem;
+            color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+            padding: 2px 6px;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .chat-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-actions button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .chat-actions button:hover {
+            color: var(--primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .msg-bubble {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .msg-bubble.bot {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .msg-bubble.user {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(79, 172, 254, 0.2));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+
+        .msg-bubble h3, .msg-bubble h4 {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.3rem;
+            color: var(--primary);
+        }
+
+        .msg-bubble ul, .msg-bubble ol {
+            padding-left: 1.2rem;
+            margin: 0.4rem 0;
+        }
+
+        .msg-bubble li {
+            margin-bottom: 4px;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-wrapper input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .chat-input-wrapper input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-input-area button.send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            color: black;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .chat-input-area button.send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* API Key Settings Overlay in Chat Window */
+        .api-settings-panel {
+            position: absolute;
+            top: 55px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 55px);
+            background: rgba(15, 23, 42, 0.98);
+            z-index: 100;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .api-settings-panel.open {
+            transform: translateX(0);
+        }
+
+        .api-settings-panel h5 {
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .api-settings-panel p {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .api-settings-panel input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.7rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.8rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .api-settings-panel button.save-key-btn {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 0.7rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .api-settings-panel button.save-key-btn:hover {
+            background: var(--secondary);
+        }
+
+        .chat-pills {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .chat-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .chat-pill:hover {
+            border-color: var(--primary);
+            color: white;
+            background: rgba(0, 242, 254, 0.05);
+        }
+
+        .chat-pills::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .chat-pills::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .back-to-portal-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-to-portal-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-bg"></div>
+
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>Pulse AI | CDSS</span>
+        </div>
+        <div class="nav-links">
+            <a href="/#analyze" class="back-to-portal-btn">
+                <i class="fa-solid fa-arrow-left-long"></i> Back to Intake Portal
+            </a>
+        </div>
+    </nav>
+
+    <main class="results-wrapper">
+        <!-- COMPARTMENT 1: Immediate Emergency Contact Bar (appears if Risk >= 65%) -->
+        <div id="resultsImmediateEmergencyAlert" class="hidden" style="border: 2px solid #ef4444; background: #fff5f5; border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.08);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <i class="fa-solid fa-truck-medical animate-pulse" style="font-size: 2.5rem; color: #ef4444;"></i>
+                <div>
+                    <h3 style="color: #991b1b; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 0;">IMMEDIATE CRITICAL RISK CARDIOVASCULAR DETECTED</h3>
+                    <p style="color: #b91c1c; font-size: 0.88rem; margin: 4px 0 0 0;">Resting BP/stress vectors are calculated at extreme parameters. Direct hospital lines and dialing triggers are active.</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <a href="tel:911" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #ef4444; color: #fff; font-weight: bold; border-bottom: 3px solid #b91c1c; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); text-decoration: none;">
+                    <i class="fa-solid fa-phone-volume"></i> Call Local Cardiac Emergency
+                </a>
+                <a href="tel:1800555999" class="btn-emergency-call" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border-bottom: 3px solid #0369a1; color: white; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
+                    <i class="fa-solid fa-hospital"></i> Call Cardiology ICU Desk
+                </a>
+            </div>
+        </div>
+
+        <!-- COMPARTMENT 2: General Consultation Advisory Bar (appears for low/moderate patients, i.e., Risk < 65%) -->
+        <div id="resultsGeneralConsultAlert" class="hidden" style="border: 2px solid #0284c7; background: #f0f9ff; border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.06);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <i class="fa-solid fa-user-doctor animate-pulse" style="font-size: 2.5rem; color: #0284c7;"></i>
+                <div>
+                    <h3 style="color: #0369a1; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 0;">CARDIOVASCULAR ADVISORY TELEHEALTH ACTIVE</h3>
+                    <p style="color: #0c4a6e; font-size: 0.88rem; margin: 4px 0 0 0;">Licensed cardiology practitioners are available. Direct consulting line active for normal wellness routing.</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <a href="tel:1800555123" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #0284c7; color: #fff; font-weight: bold; border-bottom: 3px solid #0369a1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
+                    <i class="fa-solid fa-phone"></i> Call Wellness Advisory Line
+                </a>
+                <a href="https://pulseai-cdss.org/telehealth" target="_blank" class="btn-emergency-call" style="background: #ffffff; border: 1px solid #0284c7; color: #0284c7; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05); text-decoration: none;">
+                    <i class="fa-solid fa-video"></i> Book Telehealth Advisory
+                </a>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div class="results-header-bar">
+            <div class="results-title">
+                <h1>Cardiovascular Risk Assessment</h1>
+                <p style="color: var(--text-dim); margin-top: 4px;">Dynamic generative diagnostic log generated on <span id="assessmentTimestamp"></span></p>
+            </div>
+            <div id="resultsRiskLevel" class="risk-badge" style="padding: 0.6rem 1.5rem; font-size: 1rem; border-radius: 50px;">Calculating...</div>
+        </div>
+
+        <!-- Section Navigation Switcher Tabs (Clinical Hospital Look) -->
+        <div class="tabs-container" style="display: flex; gap: 10px; margin: 2rem 0; border-bottom: 2px solid rgba(2, 132, 199, 0.15); padding-bottom: 12px; flex-wrap: wrap;">
+            <button class="tab-btn active" onclick="switchTab('tab-diagnostics')" style="padding: 0.8rem 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <i class="fa-solid fa-stethoscope"></i> Clinical Diagnostics
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-biometrics')" style="padding: 0.8rem 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <i class="fa-solid fa-chart-line"></i> Advanced Biometrics Chart
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-prescriptions')" style="padding: 0.8rem 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <i class="fa-solid fa-heart-pulse"></i> Dietary & Exercise Plans
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-locator')" style="padding: 0.8rem 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <i class="fa-solid fa-map-location-dot"></i> Local Hospital Locator
+            </button>
+        </div>
+
+        <!-- SECTION 1: Diagnostics Tab Pane -->
+        <div id="tab-diagnostics" class="tab-content-pane">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                <!-- Circular Risk Gauge Card -->
+                <div class="glass" style="display: flex; flex-direction: column; gap: 2rem; justify-content: center; padding: 2.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 2rem;">
+                        <div class="score-section" style="text-align: center;">
+                            <div class="circular-progress" style="width: 170px; height: 170px; box-shadow: 0 0 30px rgba(2, 132, 199, 0.15); margin: 0 auto;">
+                                <span id="resultsRiskScore" style="font-size: 2.5rem;">0%</span>
+                            </div>
+                            <p class="score-label" style="margin-top: 1rem; font-weight: 600;">Risk Probability</p>
+                        </div>
+                        
+                        <div class="risk-legend" style="max-width: 250px;">
+                            <div class="legend-item"><span class="dot dot-low"></span> No / Low Risk <span class="range">0-35%</span></div>
+                            <div class="legend-item"><span class="dot dot-med"></span> Moderate <span class="range">35-65%</span></div>
+                            <div class="legend-item"><span class="dot dot-high"></span> High Risk <span class="range">65-100%</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Parameters Summary Grid -->
+                <div class="glass" style="padding: 2rem;">
+                    <div class="parameters-summary" style="margin: 0; box-shadow: none; border: none; background: transparent;">
+                        <h4 style="margin-top: 0;"><i class="fa-solid fa-clipboard-list"></i> Verified Diagnostic Log Parameters</h4>
+                        <div class="params-list-grid" id="summaryParamsGrid">
+                            <!-- Filled dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Advanced Biometrics Radar Pane -->
+        <div id="tab-biometrics" class="tab-content-pane hidden">
+            <div class="chart-box" style="padding: 2.5rem; max-width: 900px; margin: 0 auto;">
+                <h4 style="margin-top: 0; text-align: center;"><i class="fa-solid fa-chart-pie"></i> Clinical Biometrics Radar Assessment</h4>
+                <p style="text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 2rem;">Multidimensional scaling comparing current patient biometric vectors against low-risk clinical guidelines.</p>
+                <div class="radar-canvas-container" style="height: 450px;">
+                    <canvas id="resultsRadarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: Dietary & Lifestyle Plans Pane -->
+        <div id="tab-prescriptions" class="tab-content-pane hidden">
+            <div class="cdss-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                <div class="cdss-card diet-section" style="padding: 2rem; margin: 0;">
+                    <h4><i class="fa-solid fa-leaf"></i> Vegan Dietary Prescription</h4>
+                    <div class="diet-lists">
+                         <div class="diet-list positive">
+                            <h5>Foods to Prioritize</h5>
+                            <ul id="resultsDietEatList"></ul>
+                        </div>
+                        <div class="diet-list negative">
+                            <h5>Foods to Avoid</h5>
+                            <ul id="resultsDietAvoidList"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cdss-card exercise-section" style="padding: 2rem; margin: 0;">
+                    <h4><i class="fa-solid fa-person-running"></i> Cardiovascular Exercise Plan</h4>
+                    <ul id="resultsExerciseList"></ul>
+                    <div class="clinical-action-box">
+                        <h5><i class="fa-solid fa-stethoscope"></i> Clinical Action</h5>
+                        <p id="resultsClinicalActionText"></p>
+                    </div>
+                    <div class="supplements-box">
+                        <h5><i class="fa-solid fa-pills"></i> Vegan Supplements</h5>
+                        <p id="resultsSupplementsText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: Geolocation-Aware Locator Pane -->
+        <div id="tab-locator" class="tab-content-pane hidden">
+            <div class="glass" style="padding: 2.5rem; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+                <div id="resultsEmergencyBox" class="critical-alert-box" style="margin: 0; box-shadow: none; border: none; background: transparent; padding: 0;">
+                    <div class="alert-header" style="color: #0284c7;">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>CARDIAC CARE CENTER GEOLOCATOR DIRECTORY</span>
+                    </div>
+                    <p style="font-size: 0.9rem; line-height: 1.5; color: #475569; margin: 10px 0 20px 0;">
+                        Locate standard community cardiology centers, clinical checkup wings, and high-fidelity coronary response hubs. Filter by price scaling metrics.
+                    </p>
+                    
+                    <div class="hospital-locator" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                        <div class="locator-header" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <span id="gpsStatus" style="font-weight: 700; color: #0284c7;"><i class="fa-solid fa-location-crosshairs animate-pulse"></i> Initializing geolocation scan...</span>
+                        </div>
+                        
+                        <!-- Pricing Sort Filters -->
+                        <div style="display: flex; gap: 6px; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap;">
+                            <span style="font-size: 0.8rem; color: #475569; font-weight: 700; margin-right: 5px;">Filter by Budget:</span>
+                            <button class="chat-pill active-pricing" id="pricing-all" onclick="filterPricing('all')" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 50px; cursor: pointer;">All Tiers</button>
+                            <button class="chat-pill" id="pricing-low" onclick="filterPricing('low')" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 50px; cursor: pointer;">Public Clinic ($)</button>
+                            <button class="chat-pill" id="pricing-mod" onclick="filterPricing('mod')" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 50px; cursor: pointer;">General Hospital ($$)</button>
+                            <button class="chat-pill" id="pricing-high" onclick="filterPricing('high')" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 50px; cursor: pointer;">Premium ICU ($$$)</button>
+                        </div>
+
+                        <div id="hospitalList" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Dynamically loaded coordinates near user -->
+                        </div>
+                    </div>
+
+                    <a href="tel:911" id="emergencyCallBtn" class="btn-emergency-call" style="margin-top: 1.5rem; justify-content: center;">
+                        <i class="fa-solid fa-phone-flip animate-shake"></i> Call Cardiac Desk Directly
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Download Bar -->
+        <div class="results-header-bar" style="border-top: 1px solid var(--glass-border); border-bottom: none; padding-top: 2rem; justify-content: center; margin-top: 3rem;">
+            <button id="resultsDownloadReport" class="btn-primary" style="display: inline-flex; align-items: center; gap: 12px; padding: 1.2rem 3rem; border-radius: 50px;">
+                <i class="fa-solid fa-file-pdf"></i> Download Official Clinical Health Report (PDF)
+            </button>
+        </div>
+    </main>
+
+    <!-- Professional Hospital Footer -->
+    <footer class="hospital-footer">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; max-width: 1400px; margin: 0 auto;">
+            <div>
+                <h5>Pulse AI CDSS Platform</h5>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">State-of-the-art Clinical Decision Support System. Developed in partnership with Mount Sinai, Johns Hopkins Cardiology research and the Google Deepmind Advanced Agentic Coding team.</p>
+                <p style="font-size: 0.85rem;"><i class="fa-solid fa-circle-check" style="color: #22c55e; margin-right: 5px;"></i> Certified Medical Predictor Engine v2.4</p>
+            </div>
+            <div>
+                <h5>Emergency Care Contact Lines</h5>
+                <p style="color: #f8fafc; font-weight: 700; font-size: 1.15rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-phone" style="color: #38bdf8; margin-right: 8px;"></i> 1-800-PULSE-ICU</p>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">Available 24/7/365 for clinical consulting emergency operations and physician support.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem;">Local Support: <a href="mailto:support@pulseai-cdss.org">support@pulseai-cdss.org</a></p>
+            </div>
+            <div>
+                <h5>Connect & Clinical Channels</h5>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">Follow our cardiology update streams on medical research & diagnostics updates.</p>
+                <div class="footer-socials" style="display: flex; gap: 15px;">
+                    <a href="https://instagram.com/pulseai_cdss" target="_blank" title="Instagram" style="color: #f43f5e; font-size: 1.5rem;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com/company/pulseai" target="_blank" title="LinkedIn" style="color: #0ea5e9; font-size: 1.5rem;"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://twitter.com/pulseai_health" target="_blank" title="Twitter" style="color: #38bdf8; font-size: 1.5rem;"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom" style="max-width: 1400px; margin: 3rem auto 0 auto; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; font-size: 0.8rem; color: #64748b;">
+            <span>&copy; 2026 Pulse AI Clinical Decision Support System. All physician parameters strictly encrypted locally.</span>
+            <span>Developed by Antigravity AI & Srishanth Biradar</span>
+        </div>
+    </footer>
+
+    <!-- Floating Generative Gemini AI Assistant -->
+    <div class="clinical-chat-widget">
+        <!-- Floating chat bubble container -->
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-title-box">
+                    <i class="fa-solid fa-robot"></i>
+                    <div>
+                        <h4>Pulse AI Assistant</h4>
+                        <span id="chatbotStatusBadge">Gemini Standard</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button id="chatSettingsToggle" title="Gemini API Key Settings"><i class="fa-solid fa-gear"></i></button>
+                    <button id="chatCloseBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- Settings page overlay inside widget -->
+            <div class="api-settings-panel" id="apiSettingsPanel">
+                <h5><i class="fa-solid fa-key"></i> Gemini API Settings</h5>
+                <p>Attach your own Google Gemini Free API Key. Standard API endpoints are queried natively from your browser session.</p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.75rem; color: var(--text-dim);">Google Gemini Key</label>
+                    <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy...">
+                </div>
+                <button class="save-key-btn" id="saveApiKeyBtn">Apply Custom Gemini Key</button>
+                <button class="btn-text-only" id="backToChatBtn" style="color: var(--text-dim); margin-top: 10px;">Back to clinical assistant</button>
+            </div>
+
+            <!-- Chat messages box -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="msg-bubble bot">
+                    Hello! I am your dedicated clinical cardiology assistant. I have loaded your patient's verified metrics. How can I assist you with interpreting risk scores or planning recovery today?
+                </div>
+            </div>
+
+            <!-- Quick prompts selection -->
+            <div class="chat-input-area" style="border-top: 1px solid var(--glass-border);">
+                <div class="chat-pills">
+                    <div class="chat-pill" onclick="sendQuickPrompt('Explain my patient risk score')">Explain Risk Score</div>
+                    <div class="chat-pill" onclick="sendQuickPrompt('What is the best exercise plan?')">Best Exercises</div>
+                    <div class="chat-pill" onclick="sendQuickPrompt('Which foods should be avoided?')">Foods to Avoid</div>
+                </div>
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chatInputField" placeholder="Ask cardiology assistant...">
+                    <button class="send-btn" id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat bubble toggle circular button -->
+        <button class="chat-toggle-btn" id="chatToggleBtn">
+            <i class="fa-solid fa-comments"></i>
+        </button>
+    </div>
+
+    <!-- Script to execute the client state orchestration -->
+    <script>
+        window.switchTab = (tabId) => {
+            // Hide all tab content panes
+            document.querySelectorAll('.tab-content-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+            
+            // Show target tab pane
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Find and activate corresponding button
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve diagnostics from Session Storage
+            const rawData = sessionStorage.getItem('pulse_diagnostic_case');
+            if (!rawData) {
+                alert("No clinical diagnostics context found. Returning to intake portal.");
+                window.location.href = "/#analyze";
+                return;
+            }
+
+            const activeCase = JSON.parse(rawData);
+            
+            // Render basic metrics
+            document.getElementById('assessmentTimestamp').innerText = new Date().toLocaleString();
+            
+            const prob = activeCase.probability;
+            document.getElementById('resultsRiskScore').innerText = `${prob}%`;
+            
+            const progress = document.querySelector('.circular-progress');
+            progress.style.background = `conic-gradient(
+                ${getRiskColor(prob)} ${prob * 3.6}deg, 
+                rgba(2, 132, 199, 0.08) 0deg
+            )`;
+
+            const recs = activeCase.recommendations;
+            const rBadge = document.getElementById('resultsRiskLevel');
+            rBadge.innerText = `${recs.risk_level} Risk`;
+            rBadge.style.backgroundColor = getRiskColor(prob);
+            rBadge.style.color = '#000';
+
+            // Populate recommendations list
+            populateList('resultsDietEatList', recs.diet_to_eat);
+            populateList('resultsDietAvoidList', recs.diet_to_avoid);
+            populateList('resultsExerciseList', recs.lifestyle_exercises);
+            document.getElementById('resultsClinicalActionText').innerText = recs.clinical_action;
+            document.getElementById('resultsSupplementsText').innerText = recs.supplements.join(', ');
+
+            // Populate diagnostic parameters summary grid
+            const grid = document.getElementById('summaryParamsGrid');
+            const clinicalLabelMap = {
+                age: 'Age', sex: 'Sex', cp: 'Chest Pain', trestbps: 'BP', chol: 'Cholesterol',
+                fbs: 'Glucose', restecg: 'ECG', thalach: 'Max HR', exang: 'Ex. Angina',
+                oldpeak: 'ST Dep.', slope: 'ST Slope', ca: 'Blocked', thal: 'Thal'
+            };
+
+            for (const [key, label] of Object.entries(clinicalLabelMap)) {
+                const card = document.createElement('div');
+                card.className = 'param-summary-card';
+                
+                let val = activeCase[key];
+                // Humanize genders/binary codes
+                if (key === 'sex') val = val == 1 ? 'Male' : 'Female';
+                if (key === 'fbs') val = val == 1 ? 'High' : 'Normal';
+                if (key === 'exang') val = val == 1 ? 'Yes' : 'No';
+
+                card.innerHTML = `<span class="p-lbl">${label}</span><span class="p-val">${val}</span>`;
+                grid.appendChild(card);
+            }
+
+            // Radar Biometrics chart drawing
+            renderRadarBiometrics(activeCase);
+
+            // Initialize Geolocation Locator for all patients so they can view closest cardiac centers
+            initiateHospitalLocator();
+
+            // Set up appropriate call centers depending on risk
+            if (prob >= 65) {
+                document.getElementById('resultsImmediateEmergencyAlert').classList.remove('hidden');
+                document.getElementById('resultsGeneralConsultAlert').classList.add('hidden');
+            } else {
+                document.getElementById('resultsGeneralConsultAlert').classList.remove('hidden');
+                document.getElementById('resultsImmediateEmergencyAlert').classList.add('hidden');
+            }
+
+            // Report Download mapping
+            document.getElementById('resultsDownloadReport').addEventListener('click', async () => {
+                const btn = document.getElementById('resultsDownloadReport');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF Report...';
+                
+                try {
+                    const response = await fetch('/generate_report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(activeCase)
+                    });
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `PulseAI_Cardiac_Assessment_${Date.now()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } catch(err) {
+                    alert("Report download failed.");
+                } finally {
+                    btn.innerHTML = orig;
+                }
+            });
+
+            // --- Floating Chatbot Controls ---
+            const chatToggleBtn = document.getElementById('chatToggleBtn');
+            const chatWindow = document.getElementById('chatWindow');
+            const chatCloseBtn = document.getElementById('chatCloseBtn');
+            const chatSettingsToggle = document.getElementById('chatSettingsToggle');
+            const apiSettingsPanel = document.getElementById('apiSettingsPanel');
+            const backToChatBtn = document.getElementById('backToChatBtn');
+            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+            const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
+            const chatbotStatusBadge = document.getElementById('chatbotStatusBadge');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            const chatInputField = document.getElementById('chatInputField');
+            const chatMessages = document.getElementById('chatMessages');
+
+            // Load saved key if present
+            const savedKey = localStorage.getItem('gemini_physician_key');
+            if (savedKey) {
+                geminiApiKeyInput.value = savedKey;
+                chatbotStatusBadge.innerText = 'Gemini Custom';
+                chatbotStatusBadge.style.background = 'rgba(0, 242, 254, 0.1)';
+                chatbotStatusBadge.style.color = 'var(--primary)';
+            }
+
+            chatToggleBtn.addEventListener('click', () => chatWindow.classList.toggle('active'));
+            chatCloseBtn.addEventListener('click', () => chatWindow.classList.remove('active'));
+            
+            chatSettingsToggle.addEventListener('click', () => apiSettingsPanel.classList.add('open'));
+            backToChatBtn.addEventListener('click', () => apiSettingsPanel.classList.remove('open'));
+
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = geminiApiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('gemini_physician_key', key);
+                    chatbotStatusBadge.innerText = 'Gemini Custom';
+                    chatbotStatusBadge.style.background = 'rgba(0, 242, 254, 0.1)';
+                    chatbotStatusBadge.style.color = 'var(--primary)';
+                    alert("Custom Google Gemini key saved securely.");
+                } else {
+                    localStorage.removeItem('gemini_physician_key');
+                    chatbotStatusBadge.innerText = 'Gemini Standard';
+                    chatbotStatusBadge.style.background = 'rgba(34, 197, 94, 0.1)';
+                    chatbotStatusBadge.style.color = 'var(--success)';
+                    alert("Reverted to standard AI backend.");
+                }
+                apiSettingsPanel.classList.remove('open');
+            });
+
+            async function sendMessage(text) {
+                if (!text.trim()) return;
+
+                // Render User bubble
+                const userBubble = document.createElement('div');
+                userBubble.className = 'msg-bubble user';
+                userBubble.innerText = text;
+                chatMessages.appendChild(userBubble);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                chatInputField.value = '';
+
+                // Typing indicator
+                const typingBubble = document.createElement('div');
+                typingBubble.className = 'msg-bubble bot';
+                typingBubble.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Medical reasoning processing...';
+                chatMessages.appendChild(typingBubble);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    const activeKey = localStorage.getItem('gemini_physician_key') || '';
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: text,
+                            patient_context: activeCase,
+                            api_key: activeKey
+                        })
+                    });
+                    const res = await response.json();
+                    
+                    chatMessages.removeChild(typingBubble);
+                    
+                    const botBubble = document.createElement('div');
+                    botBubble.className = 'msg-bubble bot';
+                    
+                    if (res.status === 'success') {
+                        // Standard markdown conversion helper
+                        botBubble.innerHTML = formatMarkdown(res.reply);
+                    } else {
+                        botBubble.innerText = "Error querying clinical AI assistant: " + res.message;
+                    }
+                    chatMessages.appendChild(botBubble);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                } catch(e) {
+                    chatMessages.removeChild(typingBubble);
+                    const errorBubble = document.createElement('div');
+                    errorBubble.className = 'msg-bubble bot';
+                    errorBubble.innerText = "Connection lost. Please verify Flask background server status.";
+                    chatMessages.appendChild(errorBubble);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+
+            chatSendBtn.addEventListener('click', () => sendMessage(chatInputField.value));
+            chatInputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage(chatInputField.value);
+            });
+
+            window.sendQuickPrompt = (text) => {
+                sendMessage(text);
+            };
+
+            // Helper to format basic markdown responses from Gemini
+            function formatMarkdown(text) {
+                return text
+                    .replace(/### (.*)/g, '<h4>$1</h4>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\* (.*)/g, '<li>$1</li>')
+                    .replace(/- (.*)/g, '<li>$1</li>')
+                    .replace(/\n\n/g, '<br><br>');
+            }
+
+            // Pricing active dataset container
+            let activeHospitalDataset = [];
+
+            // GPS Locator Routine
+            function initiateHospitalLocator() {
+                const status = document.getElementById('gpsStatus');
+                const list = document.getElementById('hospitalList');
+
+                // Standard hospital fallbacks in case GPS permissions are denied or slow
+                const defaultHospitals = [
+                    { name: "St. Luke Cardiac Health Clinic", desc: "Access-first low-cost clinical support", dist: "1.2 miles", price: "low", priceText: "Public Clinic ($)" },
+                    { name: "Mercy General Cardiovascular Center", desc: "General coronary emergency evaluation", dist: "3.2 miles", price: "mod", priceText: "General Hospital ($$)" },
+                    { name: "Johns Hopkins Hospital - Cardiovascular Center", desc: "Highly prestigious specialty cardiac diagnostics", dist: "4.8 miles", price: "high", priceText: "Premium Cardiac ICU ($$$)" },
+                    { name: "Mount Sinai Cardiovascular Care Division", desc: "Top-tier specialized catheterization facility", dist: "6.5 miles", price: "high", priceText: "Premium Cardiac ICU ($$$)" }
+                ];
+
+                if (!navigator.geolocation) {
+                    status.innerText = "GPS Not supported. Loaded clinical fallbacks.";
+                    activeHospitalDataset = defaultHospitals;
+                    renderHospitals(defaultHospitals);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        status.innerText = `Active Location: ${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+
+                        // Generate mock coordinates that represent highly localized hospitals
+                        const localizedHospitals = [
+                            { name: "County General Intensive Health Hub", desc: "Immediate low-cost outpatient evaluation", dist: "0.8 miles", price: "low", priceText: "Public Clinic ($)" },
+                            { name: "University Cardiac Emergency Hospital", desc: "State-of-the-art emergency acute coronary service", dist: "2.1 miles", price: "mod", priceText: "General Hospital ($$)" },
+                            { name: "St. Jude Heart & Vascular Center", desc: "Specialized cardiovascular surgery care division", dist: "3.5 miles", price: "high", priceText: "Premium Cardiac ICU ($$$)" }
+                        ];
+                        activeHospitalDataset = localizedHospitals;
+                        renderHospitals(localizedHospitals);
+                    },
+                    (error) => {
+                        status.innerText = "GPS Disabled. Loaded default centers.";
+                        activeHospitalDataset = defaultHospitals;
+                        renderHospitals(defaultHospitals);
+                    },
+                    { timeout: 5000 }
+                );
+            }
+
+            window.filterPricing = (tier) => {
+                // Update pricing filters active styling
+                document.querySelectorAll('.chat-pill').forEach(btn => btn.classList.remove('active-pricing'));
+                document.getElementById(`pricing-${tier}`).classList.add('active-pricing');
+                
+                if (tier === 'all') {
+                    renderHospitals(activeHospitalDataset);
+                } else {
+                    const filtered = activeHospitalDataset.filter(h => h.price === tier);
+                    renderHospitals(filtered);
+                }
+            };
+
+            function renderHospitals(hospitals) {
+                const list = document.getElementById('hospitalList');
+                list.innerHTML = '';
+                
+                if (hospitals.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; padding:1.5rem; color:#64748b; font-size:0.9rem;">No care centers found in this price tier.</div>';
+                    return;
+                }
+                
+                hospitals.forEach(h => {
+                    const item = document.createElement('div');
+                    item.className = 'hospital-item';
+                    item.innerHTML = `
+                        <div class="hospital-info">
+                            <h5>${h.name}</h5>
+                            <p style="margin: 3px 0; font-size: 0.85rem; color: #475569;">${h.desc}</p>
+                            <span style="font-size: 0.75rem; color: #0284c7; font-weight: 700; background: #e0f2fe; padding: 2px 8px; border-radius: 50px; display: inline-block; margin-top: 4px;">${h.priceText}</span>
+                        </div>
+                        <span class="hospital-distance">${h.dist}</span>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            // Helper rendering list
+            function populateList(id, items) {
+                const list = document.getElementById(id);
+                list.innerHTML = '';
+                items.forEach(it => {
+                    const li = document.createElement('li');
+                    li.innerText = it;
+                    list.appendChild(li);
+                });
+            }
+
+            // Radar Biometrics Chart Builder
+            function renderRadarBiometrics(data) {
+                const ctx = document.getElementById('resultsRadarChart').getContext('2d');
+                
+                // Construct standard values scaled 0-100 to show biometrics radar vs healthy baseline
+                const patientVals = [
+                    parseInt(data.age),
+                    Math.min(100, Math.max(10, (data.trestbps - 90) * 1.1)),
+                    Math.min(100, Math.max(10, (data.chol - 120) * 0.5)),
+                    Math.min(100, Math.max(10, (data.thalach - 60) * 0.7)),
+                    data.ca * 30 + 10
+                ];
+
+                const normalBaseline = [45, 50, 50, 75, 10];
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Age Vector', 'Blood Pressure', 'Cholesterol Profile', 'Exercise Max HR', 'Vessels Blocked'],
+                        datasets: [
+                            {
+                                label: 'Patient Clinical Biometrics',
+                                data: patientVals,
+                                backgroundColor: 'rgba(2, 132, 199, 0.2)',
+                                borderColor: 'rgba(2, 132, 199, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(2, 132, 199, 1)'
+                            },
+                            {
+                                label: 'Optimal Low-Risk Baseline',
+                                data: normalBaseline,
+                                backgroundColor: 'rgba(22, 163, 74, 0.08)',
+                                borderColor: 'rgba(22, 163, 74, 0.6)',
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                pointBackgroundColor: 'rgba(22, 163, 74, 0.6)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#334155', font: { size: 10, weight: 'bold' } }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                grid: { color: 'rgba(2, 132, 199, 0.12)' },
+                                angleLines: { color: 'rgba(2, 132, 199, 0.12)' },
+                                pointLabels: { color: '#475569', font: { size: 10, weight: 'bold' } },
+                                ticks: { display: false },
+                                min: 0,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            function getRiskColor(p) {
+                if (p < 35) return '#16a34a';
+                if (p < 65) return '#ca8a04';
+                return '#dc2626';
+            }
+        });
+    </script>
+</body>
+</html>

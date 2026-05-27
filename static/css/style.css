@@ -1,14 +1,14 @@
 :root {
-    --primary: #00f2fe;
-    --secondary: #4facfe;
-    --dark: #0f172a;
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-main: #f8fafc;
-    --text-dim: #94a3b8;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    --primary: #0284c7;
+    --secondary: #0ea5e9;
+    --dark: #f8fafc;
+    --card-bg: #ffffff;
+    --glass-border: rgba(2, 132, 199, 0.18);
+    --text-main: #0f172a;
+    --text-dim: #475569;
+    --success: #16a34a;
+    --warning: #ca8a04;
+    --danger: #dc2626;
 }
 
 * {
@@ -860,3 +860,530 @@ tr:hover td {
     .validation-dashboard { grid-template-columns: 1fr; }
     .metrics-grid { grid-template-columns: 1fr; }
 }
+
+/* Universal PDF Report Upload styling */
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.upload-zone {
+    width: 100%;
+    border: 2px dashed var(--glass-border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--primary);
+    background: rgba(0, 242, 254, 0.05);
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+}
+
+.upload-zone i {
+    font-size: 3.5rem;
+    color: var(--text-dim);
+    transition: color 0.3s, transform 0.3s;
+}
+
+.upload-zone:hover i, .upload-zone.dragover i {
+    color: var(--primary);
+    transform: translateY(-5px);
+}
+
+.upload-zone p {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.upload-zone span {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.file-input {
+    display: none;
+}
+
+/* File state box */
+.file-status-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid var(--success);
+    border-radius: 12px;
+    margin-top: 1rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.file-status-box.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+}
+
+.file-status-box i {
+    font-size: 1.2rem;
+}
+
+/* Parsed verification panel */
+.parsed-panel {
+    width: 100%;
+    margin-top: 2rem;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 2.5rem;
+    animation: slideUp 0.6s ease;
+}
+
+.parsed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.parsed-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.parsed-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 242, 254, 0.3);
+}
+
+.parsed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.parsed-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.parsed-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.parsed-badge.extracted {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.parsed-badge.default {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.parsed-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.parsed-input-wrapper input, .parsed-input-wrapper select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    padding: 0.6rem;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.parsed-input-wrapper input:focus, .parsed-input-wrapper select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.raw-text-accordion {
+    margin-top: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.raw-text-accordion summary {
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.raw-text-accordion summary:hover {
+    color: var(--primary);
+}
+
+.raw-text-box {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid var(--glass-border);
+    max-height: 250px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: #a7f3d0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    text-align: left;
+}
+
+/* ==========================================================================
+   OFFICIAL CLINICAL LIGHT THEME & 3D LIGHT BLUE OVERRIDES
+   ========================================================================== */
+
+body {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+/* Glassmorphic elements transitioned to pristine 3D light blue corporate cards */
+.glass, .cdss-card, .chart-box, .parameters-summary, .upload-zone, .login-card, .history-card {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(2, 132, 199, 0.22) !important;
+    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.04), 
+                inset 0 -3px 0 rgba(2, 132, 199, 0.12), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    border-radius: 16px !important;
+    color: #0f172a !important;
+}
+
+/* Navigation bar styled with a 3D clinical header */
+nav {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    border-bottom: 4px solid #0369a1 !important;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15) !important;
+    color: #ffffff !important;
+}
+
+nav .logo, nav .logo i {
+    color: #ffffff !important;
+}
+
+nav .nav-links a {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600 !important;
+}
+
+nav .nav-links a:hover {
+    color: #ffffff !important;
+}
+
+/* Form Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #0f172a !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Form Ingestion Inputs */
+input, select, textarea {
+    background: #ffffff !important;
+    border: 1px solid rgba(2, 132, 199, 0.3) !important;
+    color: #0f172a !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+input:focus, select:focus {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+/* Buttons with tactile 3D light blue clinical feel */
+.btn-primary, #resultsDownloadReport {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-bottom: 3px solid #0369a1 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover, #resultsDownloadReport:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35) !important;
+}
+
+/* Ledger Tables */
+table {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(2, 132, 199, 0.15) !important;
+}
+
+th {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid rgba(2, 132, 199, 0.15) !important;
+    padding: 1rem !important;
+}
+
+td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+    padding: 1rem !important;
+}
+
+tr:hover td {
+    background: rgba(2, 132, 199, 0.03) !important;
+}
+
+/* Sub-panels and logs */
+.param-card, .param-summary-card, .parsed-card {
+    background: #f8fafc !important;
+    border: 1px solid rgba(2, 132, 199, 0.15) !important;
+    box-shadow: inset 0 -2px 0 rgba(2, 132, 199, 0.05) !important;
+}
+
+.p-lbl, .score-label {
+    color: #475569 !important;
+}
+
+.p-val {
+    color: #0284c7 !important;
+}
+
+/* PDF Upload Zone Styles */
+.upload-zone {
+    background: #f8fafc !important;
+    border: 2px dashed rgba(2, 132, 199, 0.3) !important;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.04) !important;
+}
+
+/* Emergency Locator Elements */
+.hospital-item {
+    background: #ffffff !important;
+    border: 1px solid rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+    padding: 1rem !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.hospital-item:hover {
+    border-color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.03) !important;
+    transform: translateX(4px) !important;
+}
+
+.hospital-info h5 {
+    color: #0284c7 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+.hospital-distance {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    font-weight: 700 !important;
+    padding: 0.3rem 0.8rem !important;
+    border-radius: 50px !important;
+    font-size: 0.75rem !important;
+}
+
+/* Interactive Pricing Filters styling */
+.chat-pill {
+    background: #f1f5f9 !important;
+    border: 1px solid rgba(2, 132, 199, 0.15) !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.chat-pill:hover, .chat-pill.active-pricing {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25) !important;
+}
+
+/* Footer Section Stylings */
+.hospital-footer {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+    border-top: 6px solid #0284c7 !important;
+    padding: 4rem 5% 2rem 5% !important;
+    margin-top: 5rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.hospital-footer h5 {
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.2rem !important;
+}
+
+.hospital-footer p {
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+}
+
+.hospital-footer a {
+    color: #38bdf8 !important;
+    text-decoration: none !important;
+    transition: color 0.2s !important;
+}
+
+.hospital-footer a:hover {
+    color: #0ea5e9 !important;
+}
+
+.footer-bottom {
+    margin-top: 3rem !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-top: 1.5rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+    font-size: 0.8rem !important;
+}
+
+.footer-socials {
+    display: flex !important;
+    gap: 1.5rem !important;
+}
+
+.footer-socials a {
+    font-size: 1.2rem !important;
+}
+
+/* XAI Chart Background in Light Theme */
+.chart-box canvas {
+    background: #ffffff !important;
+}
+
+/* Circular Gauge Inner Background */
+.circular-progress::before {
+    background: #ffffff !important;
+}
+
+/* Floating Clinical Assistant overrides */
+.chat-window {
+    background: #ffffff !important;
+    border: 1px solid rgba(2, 132, 199, 0.25) !important;
+    box-shadow: 0 12px 40px rgba(2, 132, 199, 0.15) !important;
+}
+
+.chat-header {
+    background: #f8fafc !important;
+    border-bottom: 1px solid rgba(2, 132, 199, 0.15) !important;
+}
+
+.chat-header h4 {
+    color: #0f172a !important;
+}
+
+.msg-bubble.bot {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(2, 132, 199, 0.1) !important;
+}
+
+.msg-bubble.user {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(14, 165, 233, 0.1)) !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(2, 132, 199, 0.2) !important;
+}
+
+.chat-input-area {
+    background: #f8fafc !important;
+    border-top: 1px solid rgba(2, 132, 199, 0.15) !important;
+}
+
+.chat-input-wrapper input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(2, 132, 199, 0.2) !important;
+}
+
+.api-settings-panel {
+    background: #ffffff !important;
+}
+
+.api-settings-panel h5 {
+    color: #0f172a !important;
+}
+
+/* ==========================================================================
+   TABS REDESIGN & NAVIGATION OVERRIDES
+   ========================================================================== */
+
+.tab-btn {
+    background: #ffffff !important;
+    color: #475569 !important;
+    border: 1px solid rgba(2, 132, 199, 0.2) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+    transition: all 0.2s ease !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
+}
+
+.tab-btn:hover {
+    background: rgba(2, 132, 199, 0.04) !important;
+    color: #0284c7 !important;
+    border-color: #0284c7 !important;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    color: #ffffff !important;
+    border-color: #0284c7 !important;
+    border-bottom: 3px solid #0369a1 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+}
+
+.tab-content-pane.hidden {
+    display: none !important;
+}
+

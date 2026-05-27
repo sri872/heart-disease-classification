@@ -1,76 +1,160 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
     const form = document.getElementById('predictionForm');
-    const resultContainer = document.getElementById('resultContainer');
-    const riskScore = document.getElementById('riskScore');
-    const riskLevel = document.getElementById('riskLevel');
-    const recommendationsList = document.getElementById('recommendationsList');
-    const downloadBtn = document.getElementById('downloadReport');
+    const uploadZone = document.getElementById('uploadZone');
+    const reportFileInput = document.getElementById('reportFile');
+    const fileStatusBox = document.getElementById('fileStatusBox');
+    const parsedParamsPanel = document.getElementById('parsedParamsPanel');
+    const extractedRawText = document.getElementById('extractedRawText');
+
     let xaiChart = null;
     let lastResult = null;
 
-    async function generateSim(riskType) {
-        const btn = event.target;
-        const originalText = btn.innerText;
-        btn.innerText = "Auditioning Candidates...";
-        btn.disabled = true;
+    // --- PDF Drag-and-Drop & File Selection Handling ---
+    uploadZone.addEventListener('click', () => reportFileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleReportFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    reportFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleReportFile(e.target.files[0]);
+        }
+    });
+
+    async function handleReportFile(file) {
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            showFileStatus('Only PDF diagnostic reports are supported.', true);
+            return;
+        }
+
+        showFileStatus(`<i class="fa-solid fa-spinner fa-spin"></i> Reading clinical parameters from <strong>${file.name}</strong>...`, false);
+        
+        const formData = new FormData();
+        formData.append('report', file);
 
         try {
-            const response = await fetch('/generate_sample', {
+            const response = await fetch('/upload_report', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target: riskType })
+                body: formData
             });
             const data = await response.json();
             
-            if (data.status === 'error') throw new Error(data.message);
-            
-            await autoFillForm(data);
-            
-            // Auto-trigger analysis removed for manual presentation flow.
-            
+            if (data.status === 'success') {
+                showFileStatus(`<i class="fa-solid fa-circle-check"></i> Report <strong>${file.name}</strong> parsed successfully. Verify metrics below.`, false);
+                displayParsedResults(data.features, data.metadata, data.raw_text);
+            } else {
+                showFileStatus(`<i class="fa-solid fa-circle-exclamation"></i> Parsing failed: ${data.message}`, true);
+            }
         } catch (error) {
-            console.error("Simulation error:", error);
-            alert("Simulation failed. Ensure Pulse AI is running.");
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
+            console.error(error);
+            showFileStatus('<i class="fa-solid fa-circle-exclamation"></i> Connection error reading PDF report.', true);
         }
     }
 
-    async function autoFillForm(data) {
-        const form = document.getElementById('predictionForm');
-        
-        // Use a promise to track completion
-        return new Promise(resolve => {
-            const entries = Object.entries(data);
-            entries.forEach(([key, value], index) => {
-                const field = form.elements[key];
-                if (field && key !== 'target') {
-                    setTimeout(() => {
-                        field.value = value;
-                        field.style.transition = 'background 0.3s';
-                        field.style.background = 'rgba(0, 242, 254, 0.4)';
-                        setTimeout(() => field.style.background = '', 400);
-                        
-                        // Final resolve
-                        if (index === entries.length - 1) setTimeout(resolve, 300);
-                    }, index * 50); 
-                }
-            });
-        });
+    function showFileStatus(htmlContent, isError) {
+        fileStatusBox.innerHTML = htmlContent;
+        fileStatusBox.className = `file-status-box ${isError ? 'error' : ''}`;
+        fileStatusBox.classList.remove('hidden');
     }
 
-    // Export to window
-    window.generateSim = generateSim;
+    // --- Dynamic Population & Badge Management ---
+    function displayParsedResults(features, metadata, rawText) {
+        // Unhide verified metrics panel
+        parsedParamsPanel.classList.remove('hidden');
+        parsedParamsPanel.scrollIntoView({ behavior: 'smooth' });
 
-    // Authentication Logic
+        // Update form values
+        for (const [key, val] of Object.entries(features)) {
+            const field = document.getElementById(`input-${key}`);
+            if (field) {
+                field.value = val;
+            }
+            
+            // Update parsed/default badge
+            const badge = document.getElementById(`badge-${key}`);
+            if (badge && metadata[key]) {
+                const status = metadata[key].status;
+                if (status === 'extracted') {
+                    badge.className = 'parsed-badge extracted';
+                    badge.innerText = 'Parsed';
+                } else {
+                    badge.className = 'parsed-badge default';
+                    badge.innerText = 'Baseline';
+                }
+            }
+        }
+
+        // Extracted raw text logging
+        extractedRawText.innerText = rawText || "No raw text log extracted.";
+    }
+
+    // --- Simulated Reports (Clinical Sandbox) ---
+    async function simulateReport(riskType) {
+        let mockData = {};
+        let mockText = "";
+        
+        if (riskType === 'low') {
+            mockText = "--- HOSPITAL INTRA-CLINICAL CASE SHEET ---\nPatient Name: John Doe\nAge: 42 Years Old\nGender: Female\nSubject exhibits no chest pain (asymptomatic under rest).\nResting Blood Pressure (BP): 115 mmHg\nSerum Cholesterol: 180 mg/dL\nFasting Blood Glucose: 95 mg/dL (Normal sugar levels)\nResting EKG: sinus rhythm (normal ecg)\nPeak Heart Rate (thalach): 168 bpm\nExercise-induced Angina: None (Negative)\nST Depression: 0.0 mm\nST Slope: upsloping under stress\nBlocked Vessels: 0 on fluoroscopy\nThalassemia: normal thal state\n-----------------------------------------";
+            mockData = {
+                features: { age: 42, sex: 0, cp: 3, trestbps: 115, chol: 180, fbs: 0, restecg: 0, thalach: 168, exang: 0, oldpeak: 0.0, slope: 0, ca: 0, thal: 1 },
+                metadata: {
+                    age: { status: 'extracted' }, sex: { status: 'extracted' }, cp: { status: 'extracted' },
+                    trestbps: { status: 'extracted' }, chol: { status: 'extracted' }, fbs: { status: 'extracted' },
+                    restecg: { status: 'extracted' }, thalach: { status: 'extracted' }, exang: { status: 'extracted' },
+                    oldpeak: { status: 'extracted' }, slope: { status: 'extracted' }, ca: { status: 'extracted' }, thal: { status: 'extracted' }
+                }
+            };
+        } else if (riskType === 'moderate') {
+            mockText = "--- MOUNT SINAI CLINICAL ASSESSMENT ---\nCase Reference ID: CDSS-589-MOD\nPatient Demographics: 56 yrs of age\nSex / Gender: Male\nDiagnostic History: atypical chest discomfort observed\nCardiology Metrics:\nResting Blood Pressure: 135 mmHg\nTotal Cholesterol: 245 mg/dL\nFasting Blood Glucose level: 110 mg/dL\nResting ECG Segment: ST-T wave abnormality\nPeak Cardiac Performance: maximum heart rate of 142 bpm achieved\nExercise Induced Angina: positive yes\nST Segment Depression (oldpeak): 1.2 mm\nST Segment Slope: flat segment\nFluoroscopy blocked vessels (ca): 1 vessel\nThalassemia diagnosis: fixed defect\n---------------------------------------";
+            mockData = {
+                features: { age: 56, sex: 1, cp: 1, trestbps: 135, chol: 245, fbs: 0, restecg: 1, thalach: 142, exang: 1, oldpeak: 1.2, slope: 1, ca: 1, thal: 2 },
+                metadata: {
+                    age: { status: 'extracted' }, sex: { status: 'extracted' }, cp: { status: 'extracted' },
+                    trestbps: { status: 'extracted' }, chol: { status: 'extracted' }, fbs: { status: 'extracted' },
+                    restecg: { status: 'extracted' }, thalach: { status: 'extracted' }, exang: { status: 'extracted' },
+                    oldpeak: { status: 'extracted' }, slope: { status: 'extracted' }, ca: { status: 'extracted' }, thal: { status: 'extracted' }
+                }
+            };
+        } else if (riskType === 'high') {
+            mockText = "--- CLINICAL OUTPATIENT CARDIOLOGY SUMMARY ---\nPATIENT INTAKE FORM\nAge: 68\nSex: Male\nPatient complaints: severe squeezing typical chest pain (typical angina)\nResting Blood Pressure: 155 mmHg\nSerum Cholesterol: 290 mg/dL\nFasting Blood Sugar (Glucose): 135 mg/dL\nResting EKG Assessment: LV Hypertrophy (lvh detected)\nMax Heart Rate Achieved (thalach): 118 bpm\nExercise Angina: yes present\nST Segment Depression (Oldpeak): 2.8 mm\nST Slope: downsloping\nMajor vessels blocked: 2 vessels colored\nThalassemia: reversible defect state\n----------------------------------------------";
+            mockData = {
+                features: { age: 68, sex: 1, cp: 0, trestbps: 155, chol: 290, fbs: 1, restecg: 2, thalach: 118, exang: 1, oldpeak: 2.8, slope: 2, ca: 2, thal: 3 },
+                metadata: {
+                    age: { status: 'extracted' }, sex: { status: 'extracted' }, cp: { status: 'extracted' },
+                    trestbps: { status: 'extracted' }, chol: { status: 'extracted' }, fbs: { status: 'extracted' },
+                    restecg: { status: 'extracted' }, thalach: { status: 'extracted' }, exang: { status: 'extracted' },
+                    oldpeak: { status: 'extracted' }, slope: { status: 'extracted' }, ca: { status: 'extracted' }, thal: { status: 'extracted' }
+                }
+            };
+        }
+
+        showFileStatus(`<i class="fa-solid fa-robot"></i> Loaded simulated patient report context. Verify parameters below.`, false);
+        displayParsedResults(mockData.features, mockData.metadata, mockText);
+    }
+
+    // Export simulation to global window
+    window.simulateReport = simulateReport;
+
+    // --- Authentication Logic ---
     const loginOverlay = document.getElementById('loginOverlay');
     const loginForm = document.getElementById('loginForm');
     const logoutBtn = document.getElementById('logoutBtn');
     const historySection = document.getElementById('history');
-
-    // Check session on load - REMOVED for absolute security as requested.
-    // Professional Portal will now prompt for login every time the page is refreshed.
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -109,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHistory();
     }
 
-    // History Logic
+    // --- Patient History Storage (Secured In localStorage) ---
     function saveToHistory(data, result) {
         const history = JSON.parse(localStorage.getItem('pulse_history') || '[]');
         const record = {
@@ -118,10 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
             profile: `Age ${data.age}, ${data.sex === '1' ? 'Male' : 'Female'}`,
             probability: result.probability,
             level: result.recommendations.risk_level,
-            fullData: { ...result, ...data } // Save for reload
+            fullData: { ...result, ...data }
         };
         history.unshift(record);
-        localStorage.setItem('pulse_history', JSON.stringify(history.slice(0, 50))); // Keep last 50
+        localStorage.setItem('pulse_history', JSON.stringify(history.slice(0, 50)));
         renderHistory();
     }
 
@@ -148,10 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const history = JSON.parse(localStorage.getItem('pulse_history') || '[]');
         const record = history.find(r => r.id === id);
         if (record) {
-            displayResults(record.fullData);
-            resultContainer.classList.remove('hidden');
-            resultContainer.scrollIntoView({ behavior: 'smooth' });
-            lastResult = record.fullData;
+            sessionStorage.setItem('pulse_diagnostic_case', JSON.stringify(record.fullData));
+            window.location.href = '/results';
         }
     };
 
@@ -162,13 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Neural Model Prediction Dispatch ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Show loading state
         const submitBtn = form.querySelector('button');
         const originalText = submitBtn.innerText;
-        submitBtn.innerText = 'Analyzing Cardiac Metrics...';
+        submitBtn.innerText = 'Calculating Cardiac Metrics...';
         submitBtn.disabled = true;
 
         const formData = new FormData(form);
@@ -184,134 +266,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (result.status === 'success') {
-                lastResult = { ...result, ...data };
-                displayResults(result);
+                const combinedCase = { ...result, ...data };
+                sessionStorage.setItem('pulse_diagnostic_case', JSON.stringify(combinedCase));
                 saveToHistory(data, result);
-                resultContainer.classList.remove('hidden');
-                resultContainer.scrollIntoView({ behavior: 'smooth' });
+                
+                // Redirect immediately to the beautiful, dedicated results webpage
+                window.location.href = '/results';
             } else {
-                alert('Error: ' + result.message);
+                alert('Classification Error: ' + result.message);
             }
         } catch (err) {
             console.error(err);
-            alert('Cardiac analysis failed. Please check your connection.');
+            alert('Cardiac classification failed. Please verify local server connection.');
         } finally {
             submitBtn.innerText = originalText;
             submitBtn.disabled = false;
         }
     });
 
-    function displayResults(result) {
-        // 1. Update Score & Progress
-        const prob = result.probability;
-        riskScore.innerText = `${prob}%`;
-        
-        const progress = document.querySelector('.circular-progress');
-        progress.style.background = `conic-gradient(
-            ${getRiskColor(prob)} ${prob * 3.6}deg, 
-            rgba(255,255,255,0.05) 0deg
-        )`;
-
-        // 2. Risk Level Badge
-        const recs = result.recommendations;
-        riskLevel.innerText = `${recs.risk_level} Risk`;
-        riskLevel.style.backgroundColor = getRiskColor(prob);
-        riskLevel.style.color = '#000';
-
-        // 3. Populate CDSS Sections
-        populateList('dietEatList', recs.diet_to_eat);
-        populateList('dietAvoidList', recs.diet_to_avoid);
-        populateList('exerciseList', recs.lifestyle_exercises);
-        
-        document.getElementById('clinicalActionText').innerText = recs.clinical_action;
-        document.getElementById('supplementsText').innerText = recs.supplements.join(', ');
-
-        // 4. Render XAI Chart
-        renderXAIChart(result.explanation);
-    }
-
-    function populateList(elementId, items) {
-        const list = document.getElementById(elementId);
-        list.innerHTML = '';
-        items.forEach(item => {
-            const li = document.createElement('li');
-            li.innerHTML = item;
-            list.appendChild(li);
-        });
-    }
-
-    function renderXAIChart(explanation) {
-        const ctx = document.getElementById('xaiChart').getContext('2d');
-        
-        if (xaiChart) xaiChart.destroy();
-
-        // Sort by absolute impact
-        const sorted = [...explanation].sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact)).slice(0, 8);
-        
-        xaiChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: sorted.map(d => d.feature.toUpperCase()),
-                datasets: [{
-                    label: 'Feature Impact on Risk',
-                    data: sorted.map(d => d.impact),
-                    backgroundColor: sorted.map(d => d.impact > 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(34, 197, 94, 0.7)'),
-                    borderColor: sorted.map(d => d.impact > 0 ? '#ef4444' : '#22c55e'),
-                    borderWidth: 1,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#94a3b8' }
-                    },
-                    y: {
-                        grid: { display: false },
-                        ticks: { color: '#f8fafc' }
-                    }
-                }
-            }
-        });
-    }
-
     function getRiskColor(prob) {
-        if (prob < 35) return '#22c55e'; // Green (No / Low)
-        if (prob < 65) return '#f59e0b'; // Amber (Moderate)
-        return '#ef4444'; // Red (High)
+        if (prob < 35) return '#22c55e';
+        if (prob < 65) return '#f59e0b';
+        return '#ef4444';
     }
-
-    downloadBtn.addEventListener('click', async () => {
-        if (!lastResult) return;
-        
-        downloadBtn.innerText = 'Generating PDF...';
-        
-        try {
-            const response = await fetch('/generate_report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(lastResult)
-            });
-            
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `PulseAI_Patient_Report.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } catch (err) {
-            alert('Failed to generate report.');
-        } finally {
-            downloadBtn.innerText = 'Download Clinical Report (PDF)';
-        }
-    });
 });

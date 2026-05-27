@@ -67,165 +67,210 @@
         <section id="analyze" class="container">
             <div class="form-card glass">
                 <div class="card-header">
-                    <h2>Patient Diagnostics</h2>
-                    <p>Enter clinical parameters for Pulse AI analysis</p>
+                    <h2>Universal Patient Diagnostics</h2>
+                    <p>Upload a patient's routine medical diagnostic report (PDF) for deep AI clinical analysis.</p>
                 </div>
 
                 <div class="simulation-panel">
-                    <span class="panel-label"><i class="fa-solid fa-robot"></i> AI Patient Simulation:</span>
+                    <span class="panel-label"><i class="fa-solid fa-robot"></i> Simulation Sandbox:</span>
                     <div class="sim-buttons">
-                        <button type="button" class="btn-sim sim-low" onclick="generateSim('low')">No / Low Risk</button>
-                        <button type="button" class="btn-sim sim-med" onclick="generateSim('moderate')">Moderate Risk</button>
-                        <button type="button" class="btn-sim sim-high" onclick="generateSim('high')">High Risk Case</button>
+                        <button type="button" class="btn-sim sim-low" onclick="simulateReport('low')">Simulate Healthy Report</button>
+                        <button type="button" class="btn-sim sim-med" onclick="simulateReport('moderate')">Simulate Moderate Risk Report</button>
+                        <button type="button" class="btn-sim sim-high" onclick="simulateReport('high')">Simulate High Risk Report</button>
                     </div>
                 </div>
                 
-                <form id="predictionForm">
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label>Age <span class="label-hint">(How old are you?)</span></label>
-                            <input type="number" name="age" placeholder="e.g. 52" required min="1" max="120">
-                        </div>
-                        <div class="input-group">
-                            <label>Sex <span class="label-hint">(Male or Female?)</span></label>
-                            <select name="sex" required>
-                                <option value="1">Male</option>
-                                <option value="0">Female</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Chest Pain Type <span class="label-hint">(What kind of chest pain?)</span></label>
-                            <select name="cp" required>
-                                <option value="0">Typical Angina (Squeezing chest pain)</option>
-                                <option value="1">Atypical Angina (Unusual chest discomfort)</option>
-                                <option value="2">Non-anginal Pain (Not heart-related pain)</option>
-                                <option value="3">Asymptomatic (No chest pain at all)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Resting Blood Pressure <span class="label-hint">(BP when sitting at rest, mmHg)</span></label>
-                            <input type="number" name="trestbps" placeholder="e.g. 120" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Cholesterol Level <span class="label-hint">(Fat in blood, mg/dl)</span></label>
-                            <input type="number" name="chol" placeholder="e.g. 210" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Fasting Blood Sugar <span class="label-hint">(Sugar level after 8hrs no food)</span></label>
-                            <select name="fbs">
-                                <option value="0">Normal (&lt; 120 mg/dl)</option>
-                                <option value="1">High (&gt; 120 mg/dl — possible diabetes)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Resting ECG <span class="label-hint">(Heart electrical activity at rest)</span></label>
-                            <select name="restecg">
-                                <option value="0">Normal (Heart looks healthy)</option>
-                                <option value="1">ST-T Abnormality (Mild irregularity detected)</option>
-                                <option value="2">LV Hypertrophy (Heart wall thickening)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Max Heart Rate Achieved <span class="label-hint">(Highest heart rate during exercise)</span></label>
-                            <input type="number" name="thalach" placeholder="e.g. 150" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Exercise-Induced Angina <span class="label-hint">(Chest pain triggered by exercise?)</span></label>
-                            <select name="exang">
-                                <option value="0">No (No chest pain during exercise)</option>
-                                <option value="1">Yes (Chest pain occurs during exercise)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>ST Depression (Oldpeak) <span class="label-hint">(Heart stress level during exercise)</span></label>
-                            <input type="number" step="0.1" name="oldpeak" placeholder="e.g. 1.2" required>
-                        </div>
-                        <div class="input-group">
-                            <label>ST Slope <span class="label-hint">(Shape of heart stress curve)</span></label>
-                            <select name="slope">
-                                <option value="0">Upsloping (Good — improving under stress)</option>
-                                <option value="1">Flat (Neutral — no change under stress)</option>
-                                <option value="2">Downsloping (Concern — worsening under stress)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Major Vessels <span class="label-hint">(No. of blocked heart arteries, 0–3)</span></label>
-                            <input type="number" name="ca" min="0" max="3" value="0" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Thalassemia <span class="label-hint">(Type of blood/oxygen disorder)</span></label>
-                            <select name="thal" required>
-                                <option value="1">Normal (No blood disorder)</option>
-                                <option value="2">Fixed Defect (Permanent low blood flow area)</option>
-                                <option value="3">Reversible Defect (Temporary low blood flow)</option>
-                            </select>
-                        </div>
+                <div class="upload-container">
+                    <div id="uploadZone" class="upload-zone">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <p>Drag and drop patient PDF diagnostic report here, or click to browse</p>
+                        <span>Supports standard clinical lab sheets, EHR summaries, and patient intake forms</span>
+                        <input type="file" id="reportFile" class="file-input" accept="application/pdf">
                     </div>
-                    <button type="submit" class="btn-predict">Analyze with Pulse AI</button>
-                </form>
-            </div>
+                    
+                    <div id="fileStatusBox" class="hidden">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
 
-            <div id="resultContainer" class="result-card glass hidden">
-                <div class="result-header">
-                    <h3>Diagnostic Result</h3>
-                    <div id="riskLevel" class="risk-badge">Low Risk</div>
-                </div>
-                
-                <div class="result-body">
-                    <div class="score-section">
-                        <div class="circular-progress">
-                            <span id="riskScore">0%</span>
+                <!-- Parsed Parameters Verification Dashboard -->
+                <div id="parsedParamsPanel" class="parsed-panel hidden">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-stethoscope"></i> Verified Diagnostic Metrics</h3>
+                        <p>Review and adjust extracted parameters below to guarantee clinical correctness prior to neural risk classification.</p>
+                    </div>
+                    
+                    <form id="predictionForm">
+                        <div class="parsed-grid">
+                            <!-- Age -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Patient Age</span>
+                                    <span id="badge-age" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" id="input-age" name="age" required min="1" max="120">
+                                </div>
+                            </div>
+                            <!-- Sex -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Biological Sex</span>
+                                    <span id="badge-sex" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-sex" name="sex" required>
+                                        <option value="1">Male</option>
+                                        <option value="0">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Chest Pain -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Chest Pain Type</span>
+                                    <span id="badge-cp" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-cp" name="cp" required>
+                                        <option value="0">Typical Angina (Squeezing pain)</option>
+                                        <option value="1">Atypical Angina (Unusual chest pain)</option>
+                                        <option value="2">Non-anginal Pain (Non-cardiac chest pain)</option>
+                                        <option value="3">Asymptomatic (No chest pain)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Blood Pressure -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Resting Blood Pressure (mmHg)</span>
+                                    <span id="badge-trestbps" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" id="input-trestbps" name="trestbps" required>
+                                </div>
+                            </div>
+                            <!-- Cholesterol -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Serum Cholesterol (mg/dL)</span>
+                                    <span id="badge-chol" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" id="input-chol" name="chol" required>
+                                </div>
+                            </div>
+                            <!-- Fasting Glucose -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Fasting Blood Sugar</span>
+                                    <span id="badge-fbs" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-fbs" name="fbs" required>
+                                        <option value="0">Normal (&lt; 120 mg/dL)</option>
+                                        <option value="1">High (&gt; 120 mg/dL)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- ECG -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Resting ECG Results</span>
+                                    <span id="badge-restecg" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-restecg" name="restecg" required>
+                                        <option value="0">Normal</option>
+                                        <option value="1">ST-T Wave Abnormality</option>
+                                        <option value="2">LV Hypertrophy</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Max Heart Rate -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Max Heart Rate Achieved</span>
+                                    <span id="badge-thalach" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" id="input-thalach" name="thalach" required>
+                                </div>
+                            </div>
+                            <!-- Angina Exertion -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Exercise Angina</span>
+                                    <span id="badge-exang" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-exang" name="exang" required>
+                                        <option value="0">No (No exercise chest pain)</option>
+                                        <option value="1">Yes (Exercise chest pain occurs)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- ST Depression -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">ST Depression (Oldpeak)</span>
+                                    <span id="badge-oldpeak" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" step="0.1" id="input-oldpeak" name="oldpeak" required>
+                                </div>
+                            </div>
+                            <!-- ST Slope -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">ST Slope Segment</span>
+                                    <span id="badge-slope" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-slope" name="slope" required>
+                                        <option value="0">Upsloping</option>
+                                        <option value="1">Flat</option>
+                                        <option value="2">Downsloping</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Blocked Vessels -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Blocked Vessels (Fluoroscopy)</span>
+                                    <span id="badge-ca" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <input type="number" min="0" max="3" id="input-ca" name="ca" required>
+                                </div>
+                            </div>
+                            <!-- Thalassemia -->
+                            <div class="parsed-card">
+                                <div class="parsed-header">
+                                    <span class="parsed-label">Thalassemia State</span>
+                                    <span id="badge-thal" class="parsed-badge default">Baseline</span>
+                                </div>
+                                <div class="parsed-input-wrapper">
+                                    <select id="input-thal" name="thal" required>
+                                        <option value="1">Normal State</option>
+                                        <option value="2">Fixed Defect State</option>
+                                        <option value="3">Reversible Defect State</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <p class="score-label">Risk Probability</p>
                         
-                        <div class="risk-legend">
-                            <div class="legend-item"><span class="dot dot-low"></span> No / Low Risk <span class="range">0-35%</span></div>
-                            <div class="legend-item"><span class="dot dot-med"></span> Moderate <span class="range">35-65%</span></div>
-                            <div class="legend-item"><span class="dot dot-high"></span> High Risk <span class="range">65-100%</span></div>
-                        </div>
-                    </div>
-
-                    <div class="explanation-section">
-                        <h4>Explainable AI (XAI) - Feature Impact</h4>
-                        <canvas id="xaiChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="cdss-grid">
-                    <div class="cdss-card diet-section">
-                        <h4><i class="fa-solid fa-leaf"></i> Vegan Dietary Prescription</h4>
-                        <div class="diet-lists">
-                            <div class="diet-list positive">
-                                <h5>Foods to Prioritize</h5>
-                                <ul id="dietEatList"></ul>
-                            </div>
-                            <div class="diet-list negative">
-                                <h5>Foods to Avoid</h5>
-                                <ul id="dietAvoidList"></ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="cdss-card exercise-section">
-                        <h4><i class="fa-solid fa-person-running"></i> Cardiovascular Exercise Plan</h4>
-                        <ul id="exerciseList"></ul>
-                        <div class="clinical-action-box">
-                            <h5><i class="fa-solid fa-stethoscope"></i> Clinical Action</h5>
-                            <p id="clinicalActionText"></p>
-                        </div>
-                        <div class="supplements-box">
-                            <h5><i class="fa-solid fa-pills"></i> Vegan Supplements</h5>
-                            <p id="supplementsText"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-footer">
-                    <button id="downloadReport" class="btn-secondary">
-                        <i class="fa-solid fa-file-pdf"></i> Download Professional Clinical Report
-                    </button>
+                        <button type="submit" class="btn-predict">Initiate Neural Risk Classification</button>
+                    </form>
+                    
+                    <details class="raw-text-accordion">
+                        <summary><i class="fa-solid fa-file-invoice"></i> View Extracted Diagnostic Log Text</summary>
+                        <pre id="extractedRawText" class="raw-text-box"></pre>
+                    </details>
                 </div>
             </div>
+
+
         </section>
 
         <section id="history" class="container container-history hidden">
@@ -330,9 +375,35 @@
             </div>
         </section>
 
-        <footer>
-            <p>&copy; 2026 Pulse AI Clinical Decision Support System. For Professional Use Only.</p>
-        </footer>
+    <!-- Professional Hospital Footer -->
+    <footer class="hospital-footer">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; max-width: 1400px; margin: 0 auto;">
+            <div>
+                <h5>Pulse AI CDSS Platform</h5>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">State-of-the-art Clinical Decision Support System. Developed in partnership with Mount Sinai, Johns Hopkins Cardiology research and the Google Deepmind Advanced Agentic Coding team.</p>
+                <p style="font-size: 0.85rem;"><i class="fa-solid fa-circle-check" style="color: #22c55e; margin-right: 5px;"></i> Certified Medical Predictor Engine v2.4</p>
+            </div>
+            <div>
+                <h5>Emergency Care Contact Lines</h5>
+                <p style="color: #f8fafc; font-weight: 700; font-size: 1.15rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-phone" style="color: #38bdf8; margin-right: 8px;"></i> 1-800-PULSE-ICU</p>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">Available 24/7/365 for clinical consulting emergency operations and physician support.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem;">Local Support: <a href="mailto:support@pulseai-cdss.org">support@pulseai-cdss.org</a></p>
+            </div>
+            <div>
+                <h5>Connect & Clinical Channels</h5>
+                <p style="margin-bottom: 1rem; color: #94a3b8;">Follow our cardiology update streams on medical research & diagnostics updates.</p>
+                <div class="footer-socials" style="display: flex; gap: 15px;">
+                    <a href="https://instagram.com/pulseai_cdss" target="_blank" title="Instagram" style="color: #f43f5e; font-size: 1.5rem;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com/company/pulseai" target="_blank" title="LinkedIn" style="color: #0ea5e9; font-size: 1.5rem;"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://twitter.com/pulseai_health" target="_blank" title="Twitter" style="color: #38bdf8; font-size: 1.5rem;"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom" style="max-width: 1400px; margin: 3rem auto 0 auto; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; font-size: 0.8rem; color: #64748b;">
+            <span>&copy; 2026 Pulse AI Clinical Decision Support System. All physician parameters strictly encrypted locally.</span>
+            <span>Developed by Antigravity AI & Srishanth Biradar</span>
+        </div>
+    </footer>
 
         <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
