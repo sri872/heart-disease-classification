@@ -759,10 +759,13 @@
             </div>
         </div>
 
-        <!-- Report Download Bar -->
-        <div class="results-header-bar" style="border-top: 1px solid var(--glass-border); border-bottom: none; padding-top: 2rem; justify-content: center; margin-top: 3rem;">
+        <!-- Report Download & Action Bar -->
+        <div class="results-header-bar" style="border-top: 1px solid var(--glass-border); border-bottom: none; padding-top: 2rem; justify-content: center; gap: 20px; margin-top: 3rem; flex-wrap: wrap;">
             <button id="resultsDownloadReport" class="btn-primary" style="display: inline-flex; align-items: center; gap: 12px; padding: 1.2rem 3rem; border-radius: 50px;">
                 <i class="fa-solid fa-file-pdf"></i> Download Official Clinical Health Report (PDF)
+            </button>
+            <button onclick="openTelehealthBooking(event)" class="btn-secondary" style="background: #ffffff; border: 2px solid #0284c7; color: #0284c7; display: inline-flex; align-items: center; gap: 12px; padding: 1.2rem 3rem; border-radius: 50px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05); border-bottom: 4px solid #0284c7;">
+                <i class="fa-solid fa-video"></i> Schedule Telehealth Consultation
             </button>
         </div>
     </main>
