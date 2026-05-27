@@ -615,7 +615,7 @@
                 <a href="tel:1-800-555-123" onclick="openDialerConsole(event, '1-800-555-123', 'Cardiology Advisory & Wellness Desk')" class="btn-emergency-call" style="margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; background: #0284c7; color: #fff; font-weight: bold; border-bottom: 3px solid #0369a1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); text-decoration: none;">
                     <i class="fa-solid fa-phone"></i> Call Wellness Advisory Line
                 </a>
-                <a href="https://pulseai-cdss.org/telehealth" target="_blank" class="btn-emergency-call" style="background: #ffffff; border: 1px solid #0284c7; color: #0284c7; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05); text-decoration: none;">
+                <a href="#" onclick="openTelehealthBooking(event)" class="btn-emergency-call" style="background: #ffffff; border: 1px solid #0284c7; color: #0284c7; margin: 0; padding: 0.8rem 1.8rem; font-size: 0.95rem; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05); text-decoration: none;">
                     <i class="fa-solid fa-video"></i> Book Telehealth Advisory
                 </a>
             </div>
@@ -887,6 +887,60 @@
         </div>
     </div>
 
+    <!-- Clinical Telehealth Booking Modal -->
+    <div id="telehealthBookingModal" class="hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; transition: all 0.3s ease;">
+        <div class="glass" style="background: #ffffff !important; border: 2px solid #0284c7 !important; border-radius: 20px; max-width: 480px; width: 90%; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.25); text-align: left; position: relative;">
+            <button onclick="closeTelehealthBooking()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; transition: color 0.2s;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: #e0f2fe; color: #0284c7; margin-bottom: 1.2rem; font-size: 1.8rem; margin-inline: auto; display: flex;">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            
+            <h3 style="color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 0 0 0.5rem 0; text-align: center;">Book Secure Telehealth Advisory</h3>
+            <p style="color: #64748b; font-size: 0.85rem; margin: 0 0 1.5rem 0; line-height: 1.4; text-align: center;">Establish an encrypted audio/video uplink directly with a verified staff cardiologist in our network.</p>
+            
+            <div id="telehealthFormContent" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Select Clinical Desk Specialization</label>
+                    <select id="telehealthSpecialty" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(2, 132, 199, 0.2); font-family: 'Inter', sans-serif; background: #fff; font-size: 0.88rem; outline: none;">
+                        <option value="cardio">Cardiology Prevention & Risk Follow-up</option>
+                        <option value="nutrition">Dietary Wellness & Vegan Nutritionist</option>
+                        <option value="fitness">Lifestyle & Aerobic Rehabilitation Coaching</option>
+                    </select>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Preferred Date</label>
+                        <input type="date" id="telehealthDate" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(2, 132, 199, 0.2); font-family: 'Inter', sans-serif; font-size: 0.88rem; outline: none;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Time Window</label>
+                        <select id="telehealthTime" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(2, 132, 199, 0.2); font-family: 'Inter', sans-serif; font-size: 0.88rem; background: #fff; outline: none;">
+                            <option value="morning">Morning (09:00 AM - 12:00 PM)</option>
+                            <option value="afternoon">Afternoon (12:00 PM - 03:00 PM)</option>
+                            <option value="evening">Evening (03:00 PM - 06:00 PM)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button onclick="submitTelehealthBooking()" class="btn-primary" style="width: 100%; border-radius: 50px; padding: 1rem 0; font-size: 0.95rem; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                    <i class="fa-solid fa-calendar-check"></i> Request Telehealth Slot
+                </button>
+            </div>
+            
+            <!-- Booking Success State -->
+            <div id="telehealthSuccessContent" class="hidden" style="display: none; flex-direction: column; align-items: center; text-align: center; gap: 15px; padding: 1rem 0;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #dcfce7; color: #22c55e; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                    <i class="fa-solid fa-circle-check animate-bounce"></i>
+                </div>
+                <h4 style="color: #14532d; font-size: 1.1rem; font-weight: 700; margin: 0;">Consultation Appointment Confirmed!</h4>
+                <p style="color: #15803d; font-size: 0.85rem; line-height: 1.5; margin: 0;">A secure, encrypted Pulse-Telehealth connection uplink has been provisioned. A confirmation link & passcode has been transmitted via SMS to the patient's registered health record contact details.</p>
+                <button onclick="closeTelehealthBooking()" class="btn-primary" style="width: 100%; border-radius: 50px; padding: 0.8rem 0; font-size: 0.95rem; margin-top: 10px; background: #22c55e !important; border-bottom: 3px solid #15803d !important; cursor: pointer;">Done, Return to Portal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Script to execute the client state orchestration -->
     <script>
         window.switchTab = (tabId) => {
@@ -940,6 +994,40 @@
             }).catch(err => {
                 alert("Failed to copy number.");
             });
+        };
+
+        window.openTelehealthBooking = (event) => {
+            if (event) {
+                event.preventDefault();
+            }
+            // Set date picker default to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('telehealthDate').value = tomorrow.toISOString().split('T')[0];
+            
+            // Show form, hide success state
+            document.getElementById('telehealthFormContent').style.display = 'flex';
+            document.getElementById('telehealthSuccessContent').style.display = 'none';
+            document.getElementById('telehealthSuccessContent').classList.add('hidden');
+            
+            const modal = document.getElementById('telehealthBookingModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        };
+        
+        window.closeTelehealthBooking = () => {
+            const modal = document.getElementById('telehealthBookingModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        };
+        
+        window.submitTelehealthBooking = () => {
+            // Hide form, show confirmation state
+            document.getElementById('telehealthFormContent').style.display = 'none';
+            
+            const success = document.getElementById('telehealthSuccessContent');
+            success.classList.remove('hidden');
+            success.style.display = 'flex';
         };
 
         document.addEventListener('DOMContentLoaded', () => {
